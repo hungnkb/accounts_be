@@ -49,9 +49,7 @@ func main() {
 			return nil
 		},
 	})
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-	}))
+	app.Use(cors.New())
 	routers.Handlers(app)
 	PORT := ":" + os.Getenv("PORT")
 	log.Fatal(app.Listen(PORT))
