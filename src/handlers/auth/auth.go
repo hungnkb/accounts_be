@@ -7,10 +7,12 @@ import (
 	connection "be/src/database"
 	"be/src/models/accountModel"
 	credentialModel "be/src/models/model"
+	"fmt"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-	"time"
 )
 
 type JwtPayload struct {
@@ -102,18 +104,18 @@ func Login(c *fiber.Ctx) error {
 		Username: payload.Username,
 	})
 	if checkAccount.Error != nil {
-		return c.Status(httpCodeEnum.UNAUTHORIZED).JSON(httpMessageEnum.USERNAME_NOT_FOUND)
+		return fiber.NewError(httpCodeEnum.UNAUTHORIZED, httpMessageEnum.USERNAME_NOT_FOUND)
 	}
 	credential := credentialModel.Credential{
 		ID: account.ID,
 	}
-	db.Where(&credential).Find(&credential)
+	db.Where(&credential).First(&credential)
 	checkPassword := bcrypt.CompareHashAndPassword([]byte(credential.Password), []byte(payload.Password))
 	if checkPassword != nil {
 		return c.Status(httpCodeEnum.UNAUTHORIZED).JSON(httpMessageEnum.WRONG_PASSWORD)
 	}
 	jwtPayload := &JwtPayload{
-		ID: 12,
+		ID: account.ID,
 	}
 	genAccessToken, _ := GenAccessToken(jwtPayload)
 	bearerToken := "Bearer " + genAccessToken
@@ -136,6 +138,11 @@ func GenAccessToken(payload *JwtPayload) (tokenString string, error error) {
 	claims["name"] = payload.Name
 	claims["email"] = payload.Email
 	claims["exp"] = time.Now().Add(time.Hour * 1000).Unix()
-	tokenString, error = content.SignedString([]byte())
+	tokenString, error = content.SignedString([]byte("hehe"))
 	return
+}
+
+func VerifyToken(token *jwt.Token) {
+	info, ok := token.Method.(*jwt.SigningMethodHMAC)
+	fmt.Println(info, ok)
 }
