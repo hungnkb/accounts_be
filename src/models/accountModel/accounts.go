@@ -1,6 +1,7 @@
 package accountModel
 
 import (
+	"be/src/models/itemModel"
 	credential "be/src/models/model"
 	"time"
 )
@@ -14,4 +15,5 @@ type Account struct {
 	CreatedAt   time.Time               `json:"createdAt"`
 	UpdatedAt   time.Time               `json:"updatedAt"`
 	Credentials []credential.Credential `gorm:"foreignKey:AccountId" json:"credentials"`
+	Items       []itemModel.Item        `gorm:"foreignKey:AccountId" json:"items"`
 }

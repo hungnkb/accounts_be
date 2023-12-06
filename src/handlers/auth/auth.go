@@ -5,9 +5,11 @@ import (
 	httpCodeEnum "be/src/common/httpEnum/httpCode"
 	httpMessageEnum "be/src/common/httpEnum/httpMessage"
 	connection "be/src/database"
+	"be/src/handlers/account"
 	"be/src/models/accountModel"
 	credentialModel "be/src/models/model"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -44,10 +46,10 @@ func Router(api fiber.Router) {
 
 func Register(c *fiber.Ctx) error {
 	payload := struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
+		Username string `validate:"required,min=6,max=20" json:"username"`
+		Password string `validate:"required,min=6,max=20" json:"password"`
 		Name     string `json:"name"`
-		Email    string `json:"email"`
+		Email    string `validate:"required" json:"email"`
 	}{}
 	c.BodyParser(&payload)
 	hashPassword, _ := HashPassword(payload.Password)
@@ -145,4 +147,26 @@ func GenAccessToken(payload *JwtPayload) (tokenString string, error error) {
 func VerifyToken(token *jwt.Token) {
 	info, ok := token.Method.(*jwt.SigningMethodHMAC)
 	fmt.Println(info, ok)
+}
+
+func AuthGuard(c *fiber.Ctx) (user account.Account, err error) {
+	bearerToken := c.Get("Authorization")
+	token := strings.SplitAfter(bearerToken, "Bearer ")
+	claims := jwt.MapClaims{}
+	jwt.ParseWithClaims(token[1], claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf(("erorr"))
+		}
+		return []byte("hehe"), nil
+	})
+	id := claims["id"]
+	idFloat64, ok := id.(float64)
+	if ok == false {
+		return user, fiber.NewError(httpCodeEnum.NOT_FOUND, httpMessageEnum.USER_NOT_FOUND)
+	}
+	user, err = account.GetOne(idFloat64)
+	if err != nil {
+		return user, fiber.NewError(httpCodeEnum.UNAUTHORIZED, httpMessageEnum.UNAUTHORIZED)
+	}
+	return user, nil
 }

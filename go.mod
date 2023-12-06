@@ -13,6 +13,7 @@ require (
 	github.com/creack/pty v1.1.20 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gofiber/fiber v1.8.431 // indirect
 	github.com/gofiber/fiber/v2 v2.50.0 // indirect
 	github.com/gohugoio/hugo v0.120.3 // indirect

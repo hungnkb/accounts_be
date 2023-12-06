@@ -13,7 +13,7 @@ import (
 )
 
 type Account struct {
-	ID       int    `json:"id"`
+	ID       *int   `json:"id"`
 	Name     string `json:"name"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
@@ -50,7 +50,10 @@ func Me(c *fiber.Ctx) error {
 
 func GetOne(id float64) (user Account, error error) {
 	db := connection.Postgres()
-	if err := db.Where(&Account{ID: int(id)}).First(&user).Error; err != nil {
+	var idParse *int
+	idParse = new(int)
+	*idParse = int(id)
+	if err := db.Where(&Account{ID: idParse}).First(&user).Error; err != nil {
 		return user, err
 	}
 	return user, nil
